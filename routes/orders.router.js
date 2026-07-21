@@ -49,13 +49,13 @@ router.patch('/:id', async(req,res,next)=>{
     }
 })
 
- router.delete('/:id', async(req,res,next)=>{
-    try {
-        const {id}=req.params;
-        await service.delete(id);
-        res.status(201).json({id});
-    } catch (error) {
-        next(error);
-    }
- })
+router.delete('/:id', async (req, res, next) => {
+
+  const { id } = req.params;
+
+  const result = await service.delete(id);
+
+  res.json(result);
+
+});
  module.exports=router;

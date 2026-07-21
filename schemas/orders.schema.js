@@ -1,41 +1,54 @@
-const Joi=require('joi');
+const Joi = require('joi');
 
-const id =Joi.number();
+const id = Joi.number();
 const userId = Joi.number();
-const delivaryAddress= Joi.string();
-const deliveryReference=Joi.string();
-const total=Joi.number().precision(2);
-const status =Joi.string();
-const paymentMethod=Joi.string();
-const paymentStatus=Joi.string();
+const deliveryAddress = Joi.string(); // ✅ Corregí el typo "delivary"
+const deliveryReference = Joi.string();
+const total = Joi.number().precision(2);
+const status = Joi.string();
+const paymentMethod = Joi.string();
+const paymentStatus = Joi.string();
 
+// ✅ 1. Definimos cómo debe ser el objeto del cliente
+const customerSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+  address: Joi.string().required(),
+  reference: Joi.string().allow(null, '') // Permitimos que vaya vacío
+});
 
-createOrdersSchema=Joi.object({
-userId:userId.required(),
-delivaryAddress:delivaryAddress.required(),
-deliveryReference:deliveryReference.required(),
-total:total.required(),
-status:status.required(),
-paymentMethod:paymentMethod.required(),
-paymentStatus:paymentStatus.required()
-})
+// ✅ 2. Definimos cómo debe ser cada producto del array
+const itemSchema = Joi.object({
+  productId: Joi.number().required(),
+  quantity: Joi.number().min(1).required(),
+  price: Joi.number().precision(2).required()
+});
 
-updateOrdersSchema=Joi.object({
-    userId:userId,
-    delivaryAddress:delivaryAddress,
-    deliveryReference:deliveryReference,
-    total:total,
-    status:status,
-    paymentMethod:paymentMethod,
-    paymentStatus:paymentStatus
-})
+// ✅ 3. Modificamos TU esquema de creación
+const createOrdersSchema = Joi.object({
+  customer: customerSchema.required(), // Ahora esperamos el objeto customer
+  paymentMethod: paymentMethod.required(),
+  items: Joi.array().items(itemSchema).min(1).required() // Esperamos el array de items
+});
 
-getOrdersSchema= Joi.object({
-    id:id.required()
-})
+// ✅ 4. El de actualizar sigue casi igual
+const updateOrdersSchema = Joi.object({
+  userId: userId,
+  deliveryAddress: deliveryAddress, 
+  deliveryReference: deliveryReference,
+  total: total,
+  status: status,
+  paymentMethod: paymentMethod,
+  paymentStatus: paymentStatus
+});
 
-module.exports={
-    createOrdersSchema,
-    updateOrdersSchema,
-    getOrdersSchema
-}
+const getOrdersSchema = Joi.object({
+  id: id.required()
+});
+
+module.exports = {
+  createOrdersSchema,
+  updateOrdersSchema,
+  getOrdersSchema
+};

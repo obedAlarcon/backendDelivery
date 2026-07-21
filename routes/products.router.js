@@ -19,6 +19,28 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+
+router.get('/low-stock', async (req, res, next) => {
+
+  try {
+    console.log('Entró a la ruta low-stock');
+    const products = await service.lowStock();
+
+console.log('Productos encontrados:', products);
+    res.json(products);
+
+  } catch (error) {
+
+    next(error);
+
+  }
+
+});
+
+
+
+
+
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;

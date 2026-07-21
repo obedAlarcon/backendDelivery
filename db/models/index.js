@@ -4,10 +4,11 @@ const {Payment,PaymentSchema}=require('./payments.model');
 const {Orders,OrdersSchema}=require('./orders.model');
 const {Order_details,Order_detailsSchema}=require('./order_details.model');
 const {Categories,CategoriesSchema}=require('./categories.model');
-
+const {Customer,CustomerSchema}= require('./customer.model')
 
 function setupModels(sequelize){
     User.init(UserSchema,User.config(sequelize));
+    Customer.init(CustomerSchema, Customer.config(sequelize));
     Product.init(ProductSchema,Product.config(sequelize));
     Payment.init(PaymentSchema,Payment.config(sequelize));
     Orders.init(OrdersSchema,Orders.config(sequelize));
@@ -17,6 +18,7 @@ function setupModels(sequelize){
 
 
  User.associate(sequelize.models);
+ Customer.associate(sequelize.models);
  Product.associate(sequelize.models);
  Payment.associate(sequelize.models);
  Order_details.associate(sequelize.models);

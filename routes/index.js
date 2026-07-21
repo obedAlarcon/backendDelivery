@@ -8,7 +8,7 @@ const paymentsRouter=require('./payments.router');
 const productsRouter= require('./products.router');
 const userRouter=require('./user.router');
 const authRouter=require('./auth.router');
-
+const customerRouter = require('./customer.router')
 
 
 function routerApi(app){
@@ -21,6 +21,7 @@ function routerApi(app){
     router.use('/payments',paymentsRouter);
     router.use('/products', productsRouter);
     router.use('/user',userRouter);
+    router.use('/customers',customerRouter)
     router.use('/auth',authRouter);
 
 }
