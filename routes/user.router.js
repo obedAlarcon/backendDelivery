@@ -1,13 +1,18 @@
 const express = require('express');
-
+const passport = require('passport');
+const validatorHandler = require('../midlewares/validator.handler');
+const { checkRoles } = require('../midlewares/auth.handler')
 const UserService=require('../services/user.service');
 
-const {getUserSchema, updateUserSchema}=require('./../schemas/user.schema');
+const {getUserSchema,createUserSchema, updateUserSchema}=require('./../schemas/user.schema');
 
 const router= express.Router();
 const service = new UserService();
 
-router.get('/', async (req, res, next) => {
+router.get('/', 
+    
+      passport.authenticate('jwt', { session: false }),
+    async (req, res, next) => {
   try {
     const user = await service.find();
     res.json(user);
@@ -17,7 +22,11 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:id', async(req,res,next)=>{
+router.get('/:id',
+      validatorHandler(getUserSchema, 'params'),
+     passport.authenticate('jwt', { session: false }),
+  checkRoles('admin'),
+    async(req,res,next)=>{
     try {
         const {id}=req.params;
     
@@ -29,32 +38,39 @@ router.get('/:id', async(req,res,next)=>{
 
     }
 })
-
-router.post('/', async(req, res, next)=>{
+router.post(
+  '/',
+  validatorHandler(createUserSchema, 'body'),
+  async (req, res, next) => {
     try {
-        console.log('BODY:', req.body);
-        const body= req.body;
-        const newUser= await service.create(body);
-        res.status(201).json(newUser);
+      console.log(req.body);
+
+      const body = req.body;
+      const newUser = await service.create(body);
+
+      res.status(201).json(newUser);
     } catch (error) {
-        next(error);
+      next(error);
     }
-})
+  }
+);
 
-router.patch('/:id', async (req,res,next)=>{
-try {
-    
-    const {id}=req.params;
-    const body= req.body;
-    const user = await service.update(id,body);
-    res.json(user);
-} catch (error) {
-    next (error);
-}
+router.patch(
+  '/:id',
+  validatorHandler(getUserSchema, 'params'),
+  validatorHandler(updateUserSchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const body = req.body;
 
-
-})
-
+      const user = await service.update(id, body);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 router.delete('/:id', async(req,res,next)=>{
     try {
         const {id}=req.params;

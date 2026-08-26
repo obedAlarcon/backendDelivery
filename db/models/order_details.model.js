@@ -22,20 +22,20 @@ const Order_detailsSchema={
     field:'product_id'
   },
 
-  quantity:{
-    allowNull:false,
-    type:DataTypes.INTEGER,
-  },
+ quantity: {
+  allowNull: false,
+  type: DataTypes.INTEGER,
+},
 
-  price:{
-    allowNull:false,
-    type:DataTypes.INTEGER,
-  },
+price: {
+  allowNull: false,
+  type: DataTypes.DECIMAL(12, 2),
+},
 
-  subtotal:{
-    allowNull:false,
-    type:DataTypes.INTEGER,
-  },
+subtotal: {
+  allowNull: false,
+  type: DataTypes.DECIMAL(12, 2),
+},
 
   createdAt:{
     allowNull:false,

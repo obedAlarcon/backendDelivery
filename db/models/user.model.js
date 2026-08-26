@@ -31,6 +31,13 @@ const UserSchema={
         type:DataTypes.STRING,
         defaultValue:'customer'
     },
+    isActive: {
+  field: 'is_active',
+  type: DataTypes.BOOLEAN,
+  allowNull: false,
+  defaultValue: true,
+},
+
     createdAt:{
         allowNull:false,
         type:DataTypes.DATE,

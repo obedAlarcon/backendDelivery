@@ -4,9 +4,15 @@ function validatorHandler(schema, property) {
   return (req, res, next) => {
     const data = req[property];
     const { error } = schema.validate(data, { abortEarly: false });
+
     if (error) {
-      next(boom.badRequest(error.details.map(d => d.message).join(', ')));
+      return next(
+        boom.badRequest(
+          error.details.map(d => d.message).join(', ')
+        )
+      );
     }
+
     next();
   };
 }

@@ -10,6 +10,7 @@ async create(data){
 const hash =await  bcrypt.hash(data.password, 10);
   const newUser = await models.User.create({
     ...data,
+    isActive: data.isActive ?? true,
     password:hash  
   });
   delete newUser.dataValues.password

@@ -2,9 +2,7 @@ const Joi = require('joi');
 
 const id = Joi.number().integer();
 
-const firstName = Joi.string().min(3).max(100);
-
-const lastName = Joi.string().min(3).max(100);
+const name = Joi.string().min(3).max(100);
 
 const phone = Joi.string().min(7).max(20);
 
@@ -12,13 +10,13 @@ const email = Joi.string().email();
 
 const address = Joi.string().min(5).max(255);
 
+const reference = Joi.string().allow('').max(255);
+
 const isActive = Joi.boolean();
 
 const createCustomerSchema = Joi.object({
 
-  firstName: firstName.required(),
-
-  lastName: lastName.required(),
+  name: name.required(),
 
   phone: phone.required(),
 
@@ -26,21 +24,23 @@ const createCustomerSchema = Joi.object({
 
   address: address.required(),
 
+  reference,
+
   isActive: isActive.default(true)
 
 });
 
 const updateCustomerSchema = Joi.object({
 
-  firstName,
-
-  lastName,
+  name,
 
   phone,
 
   email,
 
   address,
+
+  reference,
 
   isActive
 

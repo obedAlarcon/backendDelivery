@@ -1,18 +1,18 @@
 const boom = require('@hapi/boom');
 const {config} = require('./../config/config');
 
-function checkApikey(req,res,next){
-    const apikey = req.headers['api'];
-    const expected = config.apiKey || config.dbPassword;
-    if (!config.apiKey) {
-        // eslint-disable-next-line no-console
-        console.warn('Warning: API_KEY not set. Using DB password as API key fallback.');
-    }
-    if(apikey === expected){
-        next();
-    }else{
-        next(boom.unauthorized());
-    }
+function checkApikey(req, res, next) {
+  const apikey = req.headers['api'];
+
+  if (!config.apiKey) {
+    return next(boom.internal('API_KEY no configurada'));
+  }
+
+  if (apikey === config.apiKey) {
+    return next();
+  }
+
+  next(boom.unauthorized());
 }
 
 function checkRoles(...roles){

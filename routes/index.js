@@ -8,8 +8,10 @@ const paymentsRouter=require('./payments.router');
 const productsRouter= require('./products.router');
 const userRouter=require('./user.router');
 const authRouter=require('./auth.router');
-const customerRouter = require('./customer.router')
-
+const customerRouter = require('./customer.router');
+const purchasesRouter = require('./purchases.router');
+const suppliersRouter = require('./suppliers.router')
+const taxesRouter = require('./taxes.router');
 
 function routerApi(app){
     const router = express.Router();
@@ -23,6 +25,8 @@ function routerApi(app){
     router.use('/user',userRouter);
     router.use('/customers',customerRouter)
     router.use('/auth',authRouter);
-
+    router.use('/suppliers',suppliersRouter);
+    router.use('/purchases', purchasesRouter);
+    router.use('/taxes',taxesRouter);
 }
 module.exports=routerApi;

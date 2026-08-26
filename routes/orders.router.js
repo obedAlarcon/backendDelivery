@@ -16,6 +16,25 @@ router.get('/', async(req, res, next)=>{
      }
 })
 
+router.get('/customer', async (req, res, next) => {
+
+  try {
+
+    const { email } = req.query;
+
+    const orders =
+      await service.findByCustomerEmail(email);
+
+    res.json(orders);
+
+  } catch (error) {
+
+    next(error);
+
+  }
+
+});
+
 router.get('/:id', async(req,res, next)=>{
     try {
         const {id}=req.params;

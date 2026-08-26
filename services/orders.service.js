@@ -2,8 +2,10 @@ const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize');
 
 const models = sequelize.models;
+
 console.log(models);
 console.log(Object.keys(models));
+
 class OrdersService {
 
   //==========================================
@@ -17,56 +19,188 @@ class OrdersService {
     try {
 
       //==========================================
-      // Buscar cliente
+      // VALIDAR DATOS DEL CLIENTE
       //==========================================
 
-      const customer = await models.Customer.findByPk(
-        data.customerId,
-        { transaction }
-      );
+      if (!data.customer) {
 
-      if (!customer) {
-
-        throw boom.notFound('Cliente no encontrado');
+        throw boom.badRequest(
+          'Los datos del cliente son obligatorios'
+        );
 
       }
 
+      const {
+        name,
+        email,
+        phone,
+        address,
+        reference
+      } = data.customer;
+
+
+      if (!name || !email || !phone || !address) {
+
+        throw boom.badRequest(
+          'Nombre, correo, teléfono y dirección son obligatorios'
+        );
+
+      }
+
+
       //==========================================
-      // Calcular total
+      // BUSCAR CLIENTE POR EMAIL
       //==========================================
 
-      const calculatedTotal = data.items.reduce((sum, item) => {
+      let customer = await models.Customer.findOne({
 
-        return sum + (item.quantity * item.price);
+        where: {
+          email: email.trim().toLowerCase()
+        },
 
-      }, 0);
+        transaction
+
+      });
+
 
       //==========================================
-      // Crear pedido
+      // CREAR CLIENTE SI NO EXISTE
+      //==========================================
+
+      if (!customer) {
+
+        customer = await models.Customer.create({
+
+          name: name.trim(),
+
+          email: email.trim().toLowerCase(),
+
+          phone: phone.trim(),
+
+          address: address.trim(),
+
+          reference: reference
+            ? reference.trim()
+            : null
+
+        }, {
+
+          transaction
+
+        });
+
+        console.log(
+          'CLIENTE CREADO:',
+          customer.id
+        );
+
+      } else {
+
+        console.log(
+          'CLIENTE EXISTENTE:',
+          customer.id
+        );
+
+        //==========================================
+        // ACTUALIZAR DATOS DEL CLIENTE
+        //==========================================
+
+        await customer.update({
+
+          name: name.trim(),
+
+          phone: phone.trim(),
+
+          address: address.trim(),
+
+          reference: reference
+            ? reference.trim()
+            : null
+
+        }, {
+
+          transaction
+
+        });
+
+      }
+
+
+      //==========================================
+      // VALIDAR PRODUCTOS
+      //==========================================
+
+      if (
+        !data.items ||
+        !Array.isArray(data.items) ||
+        data.items.length === 0
+      ) {
+
+        throw boom.badRequest(
+          'El pedido no contiene productos'
+        );
+
+      }
+
+
+      //==========================================
+      // CALCULAR TOTAL
+      //==========================================
+
+      const calculatedTotal = data.items.reduce(
+        (sum, item) => {
+
+          return sum +
+            (Number(item.quantity) * Number(item.price));
+
+        },
+        0
+      );
+
+
+      //==========================================
+      // CREAR PEDIDO
       //==========================================
 
       const newOrder = await models.Orders.create({
 
         customerId: customer.id,
 
-        userId: 1, // luego lo reemplazaremos por req.user.id
+        // Por ahora queda el usuario administrativo 1
+        userId: 1,
 
-        deliveryAddress: data.deliveryAddress,
+        deliveryAddress:
+          data.deliveryAddress || address,
 
-        deliveryReference: data.deliveryReference,
+        deliveryReference:
+          data.deliveryReference || reference,
 
         total: calculatedTotal,
 
-        paymentMethod: data.paymentMethod,
+        paymentMethod:
+          data.paymentMethod,
 
-         status: data.status,
+        status:
+          data.status || 'Pendiente',
 
-  paymentStatus: data.paymentStatus
+        paymentStatus:
+          data.paymentStatus || 'Pendiente'
 
-      }, { transaction });
+      }, {
+
+        transaction
+
+      });
+
+
+      console.log(
+        'PEDIDO CREADO:',
+        newOrder.id
+      );
+
 
       //==========================================
-      // Crear detalle del pedido
+      // CREAR DETALLES DEL PEDIDO
       //==========================================
 
       const details = data.items.map(item => ({
@@ -75,34 +209,59 @@ class OrdersService {
 
         product_id: item.productId,
 
-        quantity: item.quantity,
+        quantity: Number(item.quantity),
 
-        price: item.price,
+        price: Number(item.price),
 
-        subtotal: item.quantity * item.price
+        subtotal:
+          Number(item.quantity) *
+          Number(item.price)
 
       }));
 
-      await models.Order_details.bulkCreate(details, { transaction });
+
+      await models.Order_details.bulkCreate(
+        details,
+        {
+          transaction
+        }
+      );
+
+
+      console.log(
+        'DETALLES CREADOS:',
+        details
+      );
+
 
       //==========================================
-      // Descontar inventario
+      // DESCONTAR INVENTARIO
       //==========================================
 
       for (const item of data.items) {
 
-  const product = await models.Product.findByPk(
-    item.productId,
-    { transaction }
-  );
+        const product =
+          await models.Product.findByPk(
+            item.productId,
+            {
+              transaction
+            }
+          );
+
 
         if (!product) {
 
-          throw boom.notFound(`Producto ${item.productId} no encontrado`);
+          throw boom.notFound(
+            `Producto ${item.productId} no encontrado`
+          );
 
         }
 
-        if (product.stock < item.quantity) {
+
+        if (
+          Number(product.stock) <
+          Number(item.quantity)
+        ) {
 
           throw boom.badRequest(
             `Stock insuficiente para ${product.name}`
@@ -110,27 +269,59 @@ class OrdersService {
 
         }
 
+
         await product.update({
 
-          stock: product.stock - item.quantity
+          stock:
+            Number(product.stock) -
+            Number(item.quantity)
 
-        }, { transaction });
+        }, {
+
+          transaction
+
+        });
 
       }
 
+
+      //==========================================
+      // CONFIRMAR TRANSACCIÓN
+      //==========================================
+
       await transaction.commit();
 
-      return await this.findOne(newOrder.id);
+
+      console.log(
+        'TRANSACCION CONFIRMADA:',
+        newOrder.id
+      );
+
+
+      //==========================================
+      // DEVOLVER PEDIDO COMPLETO
+      //==========================================
+
+      return await this.findOne(
+        newOrder.id
+      );
+
 
     } catch (error) {
 
       await transaction.rollback();
+
+      console.error(
+        'ERROR CREANDO PEDIDO:',
+        error
+      );
 
       throw error;
 
     }
 
   }
+
 
   //==========================================
   // Obtener todos
@@ -152,66 +343,150 @@ class OrdersService {
 
         {
           association: 'order_details',
+
           include: [
+
             {
               association: 'product'
             }
+
           ]
+
         }
 
       ],
 
-      order: [['createdAt', 'DESC']]
+      order: [
+        ['createdAt', 'DESC']
+      ]
 
     });
 
   }
 
+
   //==========================================
   // Obtener uno
   //==========================================
-async findOne(id) {
 
-  console.log('Buscando pedido:', id);
+  async findOne(id) {
 
-  const order = await models.Orders.findByPk(id, {
+    const order =
+      await models.Orders.findByPk(id, {
+
+        include: [
+
+          {
+            association: 'customer'
+          },
+
+          {
+            association: 'user'
+          },
+
+          {
+
+            association: 'order_details',
+
+            include: [
+
+              {
+                association: 'product'
+              }
+
+            ]
+
+          }
+
+        ]
+
+      });
+
+
+    if (!order) {
+
+      throw boom.notFound(
+        'Pedido no encontrado'
+      );
+
+    }
+
+
+    return order;
+
+  }
+async findByCustomerEmail(email) {
+
+  const orders = await models.Orders.findAll({
+
     include: [
-      { association: 'customer' },
-      { association: 'user' },
+
+      {
+        association: 'customer',
+
+        where: {
+          email: email
+        }
+      },
+
       {
         association: 'order_details',
+
         include: [
-          { association: 'product' }
+          {
+            association: 'product'
+          }
         ]
       }
-    ]
+
+    ],
+
+    order: [['createdAt', 'DESC']]
+
   });
 
-  console.log('Pedido encontrado:', order);
-
-  if (!order) {
-    throw boom.notFound('Pedido no encontrado');
-  }
-
-  return order;
+  return orders;
 
 }
+
+  //==========================================
+  // Actualizar
+  //==========================================
+
+  async update(id, changes) {
+
+    const order =
+      await this.findOne(id);
+
+    const response =
+      await order.update(changes);
+
+    return response;
+
+  }
+
+
   //==========================================
   // Eliminar
   //==========================================
 
   async delete(id) {
 
-    const order = await this.findOne(id);
+    const order =
+      await this.findOne(id);
 
     await order.destroy();
 
     return {
-      message: 'Pedido eliminado'
+
+      message:
+        'Pedido eliminado'
+
     };
 
   }
 
 }
+
 
 module.exports = OrdersService;
