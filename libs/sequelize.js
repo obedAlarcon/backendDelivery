@@ -13,6 +13,11 @@ console.log('DB_NAME:', config.dbName ? 'OK' : 'VACIO');
 console.log('DB_PORT:', config.dbPort ? 'OK' : 'VACIO');
 console.log('DB_PASSWORD:', config.dbPassword ? 'OK' : 'VACIO');
 const sequelize = new Sequelize(URI,{
+     username: config.dbUser,
+  password: config.dbPassword,
+  host: config.dbHost,
+  port: config.dbPort,
+  database: config.dbName,
     dialect:'postgres',
     logging:false,
 
