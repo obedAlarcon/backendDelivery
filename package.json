@@ -25,6 +25,7 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^10.0.14",
     "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -36,9 +37,9 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.5",
     "chai": "^4.3.8",
     "mocha": "^10.2.0",
+    "sequelize-cli": "^6.6.5",
     "supertest": "^6.3.4"
   }
 }

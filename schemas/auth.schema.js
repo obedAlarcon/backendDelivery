@@ -1,6 +1,7 @@
 const Joi = require('joi');
 
 const email = Joi.string().email();
+
 const password = Joi.string().min(6);
 
 const loginSchema = Joi.object({
@@ -8,4 +9,17 @@ const loginSchema = Joi.object({
   password: password.required(),
 });
 
-module.exports = { loginSchema };
+const recoverySchema = Joi.object({
+  email: email.required(),
+});
+
+const changePasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: password.required(),
+});
+
+module.exports = {
+  loginSchema,
+  recoverySchema,
+  changePasswordSchema
+};

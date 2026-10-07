@@ -12,7 +12,7 @@ const { Purchase, PurchaseSchema } = require('./purchases.model');
 const { Supplier, SupplierSchema } = require('./suppliers.model');
 const {Tax, TaxSchema}=require('./taxes.model');
 const{PurchaseDetailTax,PurchaseDetailTaxSchema}=require('./purchase-detail-tax.model');
-
+const { Credit, CreditSchema } = require('./credit.model');
 
 function setupModels(sequelize){
 
@@ -48,7 +48,7 @@ Supplier.init(SupplierSchema,Supplier.config(sequelize));
 
 Tax.init(TaxSchema,Tax.config(sequelize));
 PurchaseDetailTax.init(PurchaseDetailTaxSchema,PurchaseDetailTax.config(sequelize));
-
+Credit.init(CreditSchema, Credit.config(sequelize));
     // =========================
     // ASSOCIATIONS
     // =========================
@@ -71,6 +71,7 @@ PurchaseDetailTax.init(PurchaseDetailTaxSchema,PurchaseDetailTax.config(sequeliz
      Supplier.associate(sequelize.models);
      Tax.associate(sequelize.models);
      PurchaseDetailTax.associate(sequelize.models);
+     Credit.associate(sequelize.models);
     // Compras
 
 
