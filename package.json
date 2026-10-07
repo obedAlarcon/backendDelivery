@@ -1,12 +1,13 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "app para pedidos ",
+  "description": "app para pedidos",
   "license": "ISC",
   "author": "Obed Albeiro Alarcon",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "mocha --recursive --exit",
     "dev": "nodemon index.js",
     "lint": "eslint",
