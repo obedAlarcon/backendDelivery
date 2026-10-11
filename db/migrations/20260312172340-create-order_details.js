@@ -1,14 +1,21 @@
+﻿
 'use strict';
-const {ORDER_DETAILS_TABLE,Oder_detailsSchema}=require('./../models/order_details');
+
+const {
+  ORDER_DETAILS_TABLE,
+  Order_detailsSchema,
+} = require('./../models/order_details.model');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.createTable(ORDER_DETAILS_TABLE,Oder_detailsSchema);
-   
+  async up(queryInterface) {
+    await queryInterface.createTable(
+      ORDER_DETAILS_TABLE,
+      Order_detailsSchema
+    );
   },
 
-  async down (queryInterface, Sequelize) {
-  await queryInterface.drop(ORDER_DETAILS_TABLE);
-  }
+  async down(queryInterface) {
+    await queryInterface.dropTable(ORDER_DETAILS_TABLE);
+  },
 };

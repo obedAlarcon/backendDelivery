@@ -96,6 +96,7 @@ class PurchaseDetail extends Model {
 
   }
 
+
   static config(sequelize) {
     return {
       sequelize,
@@ -104,6 +105,7 @@ class PurchaseDetail extends Model {
       timestamps: false
     };
   }
+
 
 }
 

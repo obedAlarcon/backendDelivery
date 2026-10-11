@@ -1,3 +1,4 @@
+
 const express = require('express');
 const passport = require('passport');
 const path = require('path');
@@ -10,8 +11,18 @@ const { logErrors, errorHandler } = require('./midlewares/error.handler');
 
 const app = express();
 
+const frontendPath = path.join(
+  __dirname,
+  'delivery-app',
+  'dist',
+  'delivery-app',
+  'browser'
+);
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(frontendPath));
+
 app.use(cors({
   origin: 'http://localhost:4200',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -20,10 +31,6 @@ app.use(cors({
 
 require('./utils/auth');
 app.use(passport.initialize());
-
-app.get('/', (req, res) => {
-  res.send('hola este es el servidor de app de pedidos');
-});
 
 app.get('/test', (req, res) => {
   res.json({ message: 'API funcionando' });
@@ -34,7 +41,33 @@ app.get('/nueva-ruta', checkApikey, (req, res) => {
 });
 
 routerApi(app);
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET') {
+    return next();
+  }
+
+  if (
+    req.path.startsWith('/api/') ||
+    req.path === '/api' ||
+    req.path.startsWith('/uploads/') ||
+    req.path === '/uploads' ||
+    req.path.startsWith('/api-docs') ||
+    req.path === '/test' ||
+    req.path === '/nueva-ruta'
+  ) {
+    return next();
+  }
+
+  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+    if (err) {
+      next(err);
+    }
+  });
+});
+
 app.use(logErrors);
 app.use(errorHandler);
 

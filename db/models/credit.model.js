@@ -79,14 +79,20 @@ const CreditSchema = {
 
 class Credit extends Model {
 
-  static associate(models) {
+static associate(models) {
 
-    this.belongsTo(models.Orders, {
-      as: 'order',
-      foreignKey: 'order_id',
-    });
+  this.belongsTo(models.Orders, {
+    as: 'order',
+    foreignKey: 'order_id',
+  });
 
-  }
+  this.hasMany(models.CreditDetail, {
+    as: 'details',
+    foreignKey: 'credit_id',
+  });
+
+}
+
 
   static config(sequelize) {
 
